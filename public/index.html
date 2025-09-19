@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pampangan Restaurant — Filipino Kitchen</title>
+  <meta name="description" content="Authentic Pampangan Filipino restaurant with tropical palette, menu filtering, specials, reviews, and reservations." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Pacifico&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="#top" aria-label="Home">
+        <div class="brand__logo" aria-hidden="true">PR</div>
+        <div class="brand__name">Pampangan Restaurant</div>
+      </a>
+      <nav aria-label="Primary">
+        <ul>
+          <li><a href="#menu">Menu</a></li>
+          <li><a href="#specials">Specials</a></li>
+          <li><a href="#about">Our Story</a></li>
+          <li><a href="#visit">Visit</a></li>
+        </ul>
+      </nav>
+      <button id="reserveBtn" class="cta">Reserve</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero" id="top">
+      <div class="container hero__inner">
+        <div>
+          <span class="chip">🍽️ Pampangan Flavors</span>
+          <h1>Where tradition meets taste in every gathering.</h1>
+          <p>Slow-simmered adobo, bright calamansi, smoky inihaw, and sweet halo-halo—crafted with love and shared with joy.</p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap">
+            <button class="cta" onclick="scrollToId('menu')">View Menu</button>
+            <button class="cta" onclick="scrollToId('specials')">Today's Special</button>
+          </div>
+        </div>
+        <div class="hero__card" role="img" aria-label="Tropical abstract with mango and leaf hues">
+          <div class="leaf-bar" aria-hidden="true"></div>
+          <div class="specials-grid">
+            <div class="special-card">
+              <strong>Dish of the Day</strong>
+              <p id="dishOfDay">Loading…</p>
+              <div id="dishTags" class="pill-container"></div>
+            </div>
+            <div class="special-card">
+              <strong>Hours</strong>
+              <p>Mon–Thu: 11:00–21:00<br>Fri–Sat: 11:00–22:00<br>Sun: 11:00–20:00</p>
+              <button class="cta" onclick="scrollToId('visit')">Get Directions</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Specials Section -->
+    <section id="specials" class="container">
+      <h2>Chef's Specials</h2>
+      <p class="sub">A rotating selection inspired by home-cooked classics and seasonal produce.</p>
+      <div class="specials">
+        <div class="special-card">
+          <strong>Kamayan Friday</strong>
+          <p>Experience boodle fight dining—banana leaves, grilled favorites, and eat with your hands. Share with friends!</p>
+          <div class="special-grid" id="kamayanList"></div>
+        </div>
+        <div class="special-card">
+          <strong>Fiesta Drinks</strong>
+          <p>Refreshing sips featuring calamansi, ube, and coconut.</p>
+          <ul>
+            <li>Calamansi Cooler</li>
+            <li>Ube Latte</li>
+            <li>Buko Pandan Shake</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="container">
+      <h2>Menu</h2>
+      <div class="menu-controls" role="tablist" aria-label="Menu filters">
+        <button class="tab active" data-filter="all" role="tab">All</button>
+        <button class="tab" data-filter="appetizer" role="tab">Appetizers</button>
+        <button class="tab" data-filter="main" role="tab">Mains</button>
+        <button class="tab" data-filter="dessert" role="tab">Desserts</button>
+        <button class="tab" data-filter="drinks" role="tab">Drinks</button>
+      </div>
+      <div class="menu-grid" id="menuGrid" aria-live="polite"></div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="container">
+      <h2>Our Story</h2>
+      <div class="about">
+        <div class="story">
+          <p>Rooted in Pampangan culinary tradition—we cook the way our families taught us: generous portions, bold flavors, and a table for everyone.</p>
+          <p>We source locally when we can and import essentials like bagoong, patis, and authentic vinegars to honor tradition.</p>
+          <div class="pill-container">
+            <span class="pill">Family Recipes</span>
+            <span class="pill">Local Produce</span>
+            <span class="pill">Kamayan</span>
+          </div>
+        </div>
+        <div class="story">
+          <strong>Tell your friends!</strong>
+          <p>Leave a review or tag us on social—your support helps small, local kitchens like ours thrive.</p>
+          <button class="cta" onclick="scrollToId('reviews')">See Reviews</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section id="reviews" class="container">
+      <h2>Community Reviews</h2>
+      <div class="reviews">
+        <div class="review-track" id="reviewTrack" aria-label="Customer reviews">
+          <!-- JS injected reviews -->
+        </div>
+        <div class="foot-card">
+          <strong>Rate your visit</strong>
+          <p>We'd love to hear from you. Share your favorites!</p>
+          <button class="cta" onclick="alert('Thank you for your support!')">Leave a Review</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visit & Reservation Section -->
+    <section id="visit" class="container">
+      <h2>Reserve a Table</h2>
+      <div class="foot">
+        <div class="foot-card">
+          <strong>Visit Us</strong>
+          <p>123 Mango Ave, Your City, CA</p>
+          <iframe src="https://www.google.com/maps/embed?pb=..." width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+          <p><strong>Call:</strong> (555) 123-4567</p>
+        </div>
+        <div class="foot-card">
+          <strong>Hours</strong>
+          <p>Mon–Thu: 11:00–21:00<br>Fri–Sat: 11:00–22:00<br>Sun: 11:00–20:00</p>
+          <p><strong>Follow:</strong> @pampanganrestaurant</p>
+        </div>
+      </div>
+
+      <form id="reservationForm">
+        <div class="form-group">
+          <label for="guestName">Name</label>
+          <input type="text" id="guestName" name="guestName" placeholder="Your Name" required>
+        </div>
+        <div class="form-group">
+          <label for="guestEmail">Email</label>
+          <input type="email" id="guestEmail" name="guestEmail" placeholder="Your Email" required>
+        </div>
+        <div class="form-group">
+          <label for="guestPhone">Phone</label>
+          <input type="tel" id="guestPhone" name="guestPhone" placeholder="Your Phone" required>
+        </div>
+        <div class="form-group">
+          <label for="partySize">Party Size</label>
+          <input type="number" id="partySize" name="partySize" placeholder="Number of Guests" min="1" required>
+        </div>
+        <div class="form-group">
+          <label for="date">Date</label>
+          <input type="date" id="date" name="date" required>
+        </div>
+        <div class="form-group">
+          <label for="time">Time</label>
+          <input type="time" id="time" name="time" required>
+        </div>
+        <button type="submit" class="cta">Reserve</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- Scripts -->
+  <script src="/api.js"></script>
+  <script src="/client.js"></script>
+</body>
+</html>

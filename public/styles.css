@@ -1,0 +1,211 @@
+:root {
+  /* Core palette */
+  --leaf: #2E7D32;           /* banana leaf green */
+  --leaf-600: #256628;
+  --leaf-100: #e6f2e6;
+  --mango: #FFB300;          /* mango yellow */
+  --mango-600: #E09A00;
+  --coconut: #654321;        /* warm wood brown */
+  --coconut-700: #4E3218;
+  --banig: #F8F1D9;          /* light woven neutral */
+  --pastel-green: #9AD3A2;   /* pastel accent */
+  --coral: #FF7F66;          /* fiesta coral */
+  --turquoise: #29B6F6;      /* coastal turquoise */
+  --rice: #FFFDF5;           /* off-white */
+  --ink: #2b2b2b;
+
+  /* Shadows & radii */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 8px 24px rgba(0,0,0,.12);
+  --radius: 18px;            /* soft corners */
+}
+
+* { box-sizing:border-box }
+html, body { height:100% }
+body {
+  margin:0;
+  font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color:var(--ink);
+  background: linear-gradient(180deg, var(--banig), #fffef8 40%, var(--leaf-100));
+}
+
+/* Top bar */
+header {
+  position:sticky; top:0; z-index:1000;
+  backdrop-filter:saturate(150%) blur(6px);
+  background:rgba(255,255,255,.75);
+  border-bottom:1px solid rgba(0,0,0,.05);
+}
+.container { max-width:1100px; margin:0 auto; padding:0 18px; }
+.nav { display:flex; align-items:center; justify-content:space-between; padding:12px 0; }
+.brand {
+  display:flex; align-items:center; gap:12px;
+  text-decoration:none; color:inherit;
+}
+.brand__logo {
+  width:40px; height:40px; border-radius:12px;
+  display:grid; place-items:center;
+  background:radial-gradient(circle at 30% 30%, var(--mango), var(--coral));
+  color:white; font-weight:800; box-shadow:var(--shadow-sm);
+}
+.brand__name { font-family:Pacifico, cursive; font-size:1.3rem; letter-spacing:.2px; }
+
+nav ul { display:flex; gap:14px; list-style:none; margin:0; padding:0; }
+nav a {
+  text-decoration:none; color:inherit;
+  padding:8px 12px; border-radius:10px;
+}
+nav a:hover { background:var(--leaf-100); }
+
+/* CTA Buttons */
+.cta {
+  background:linear-gradient(135deg, var(--mango), var(--coral));
+  color:#fff; border:none;
+  padding:10px 14px;
+  border-radius:12px;
+  font-weight:700; cursor:pointer;
+  box-shadow:var(--shadow-sm);
+}
+.cta:hover { filter:brightness(.98); }
+
+/* Hero */
+.hero {
+  position:relative; overflow:clip; isolation:isolate;
+  background:linear-gradient(135deg, rgba(46,125,50,.12), rgba(255,179,0,.12)),
+             radial-gradient(1000px 400px at 80% -20%, rgba(41,182,246,.18), transparent),
+             radial-gradient(800px 320px at 0% 0%, rgba(255,127,102,.15), transparent);
+  margin-bottom:48px;
+}
+.hero__inner {
+  display:grid; grid-template-columns:1.1fr .9fr;
+  gap:28px; align-items:center;
+  padding:56px 0;
+}
+.hero h1 { font-size:clamp(2rem, 4.5vw, 3.2rem); line-height:1.05; margin:0 0 14px; }
+.hero p { font-size:1.05rem; margin:0 0 20px; }
+.hero__card {
+  background:var(--rice); border:1px solid rgba(0,0,0,.06);
+  border-radius:var(--radius); padding:18px;
+  box-shadow:var(--shadow-md);
+}
+.chip {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 10px; border-radius:999px;
+  font-weight:700; font-size:.85rem;
+  background:linear-gradient(135deg, var(--leaf), var(--leaf-600));
+  color:#fff; margin-bottom:12px;
+}
+
+/* Banana leaf divider */
+.leaf-bar {
+  height:10px;
+  background:repeating-linear-gradient(45deg, var(--leaf-600) 0 16px, var(--leaf) 16px 32px);
+  border-radius:12px;
+}
+
+/* Sections */
+section { padding:40px 0; }
+h2 { font-size:1.8rem; margin:0 0 18px; }
+.sub { color:#666; margin-top:-10px; margin-bottom:18px; }
+
+/* Specials / Dish of the Day */
+.specials { display:grid; grid-template-columns:1.2fr .8fr; gap:18px; margin-bottom:28px; }
+.special-card {
+  background:#fff; border:1px solid rgba(0,0,0,.08);
+  border-radius:var(--radius); box-shadow:var(--shadow-sm);
+  padding:18px;
+}
+.special-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; }
+.pill {
+  background:var(--leaf-100); color:var(--leaf-600);
+  padding:6px 10px; border-radius:999px;
+  font-size:.8rem; font-weight:700;
+}
+
+/* Menu */
+.menu-controls { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px; }
+.tab {
+  border:1px solid rgba(0,0,0,.08); background:#fff;
+  padding:8px 12px; border-radius:999px; cursor:pointer;
+}
+.tab.active { background:var(--leaf); color:white; border-color:transparent; }
+
+.menu-grid {
+  display:grid; grid-template-columns:repeat(3, 1fr);
+  gap:16px; margin-bottom:16px;
+}
+.card {
+  background:#fff; border:1px solid rgba(0,0,0,.06);
+  border-radius:16px; overflow:hidden;
+  box-shadow:var(--shadow-sm);
+  display:flex; flex-direction:column;
+}
+.card__img {
+  aspect-ratio:4/3;
+  background:linear-gradient(135deg, #fff0d9, #ffe9e3);
+  display:grid; place-items:center;
+  font-weight:800; color:#aa6920;
+}
+.card__body { padding:14px; display:grid; gap:6px; }
+.price { font-weight:800; color:var(--coconut); }
+
+/* About */
+.about { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:16px; }
+.about .story {
+  background:var(--rice); border:1px solid rgba(0,0,0,.06);
+  border-radius:var(--radius); padding:18px;
+}
+
+/* Reviews */
+.reviews { display:grid; grid-template-columns:2fr 1fr; gap:16px; }
+.review-track {
+  display:flex; gap:14px;
+  overflow:auto; scroll-snap-type:x mandatory;
+  padding-bottom:6px;
+}
+.review {
+  min-width:260px; scroll-snap-align:start;
+  background:#fff; border:1px solid rgba(0,0,0,.06);
+  border-radius:16px; padding:14px;
+  box-shadow:var(--shadow-sm);
+}
+.stars { color:#EFB810; }
+
+/* Footer */
+footer {
+  margin-top:40px;
+  background:linear-gradient(180deg, var(--banig), #fff7d6);
+  border-top:1px solid rgba(0,0,0,.06);
+}
+.foot { display:grid; grid-template-columns:1.2fr .8fr; gap:18px; padding:24px 0; }
+.foot-card {
+  background:#fff; border:1px solid rgba(0,0,0,.06);
+  border-radius:16px; padding:16px;
+}
+
+/* Loading and error states */
+.loading {
+  text-align: center;
+  color: var(--leaf);
+  font-style: italic;
+  padding: 20px;
+}
+.error {
+  text-align: center;
+  color: var(--coral);
+  background: rgba(255, 127, 102, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 127, 102, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .hero__inner, .specials, .menu-grid, .about, .reviews, .foot {
+    grid-template-columns:1fr;
+  }
+  .menu-grid { grid-template-columns:repeat(2, 1fr); }
+}
+@media (max-width: 520px) {
+  .menu-grid { grid-template-columns:1fr; }
+}
