@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(cors());
 
 // Serve static files (your HTML, CSS, JS files)
-app.use(express.static('.'));
+app.use(express.static('public'));
 
 // PostgreSQL connection using environment variables
 const pool = new Pool({
@@ -98,7 +98,7 @@ function generateTimeSlots() {
 // Nodemailer setup (only if email credentials are provided)
 let transporter = null;
 if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
-  transporter = nodemailer.createTransporter({
+  transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
       user: process.env.EMAIL_USER,
@@ -201,23 +201,44 @@ app.get("/api/availability", async (req, res) => {
 
 // Create a reservation
 app.post("/api/reservations", async (req, res) => {
-  const { guestName, guestEmail, guestPhone, partySize, date, time } = req.body;
-
-  if (!guestName || !guestEmail || !partySize || !date || !time) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
-
   try {
+  let { guestName, guestEmail, guestPhone, partySize, date, time } = req.body;
+
+    console.log("Reservation request:", req.body);
+
+    if (!guestName || !guestEmail || !partySize || !date || !time) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Ensure time is in HH:MM:SS format
+    if (time.length === 5) time += ':00';
+
+    // Defensive parsing for numeric fields
+    partySize = parseInt(partySize, 10);
+    if (Number.isNaN(partySize) || partySize <= 0) {
+      return res.status(400).json({ error: "Invalid party size" });
+    }
+
+    // Quick check: if requested party size is larger than any single table's capacity,
+    // return a clear error (combine-tables logic would be more complex and is optional).
+    const maxCapRes = await pool.query('SELECT MAX(capacity) as max_capacity FROM tables');
+    const maxCapacity = maxCapRes.rows && maxCapRes.rows[0] ? parseInt(maxCapRes.rows[0].max_capacity, 10) : 0;
+    if (partySize > maxCapacity) {
+      console.log(`Requested party size ${partySize} exceeds max table capacity ${maxCapacity}`);
+      return res.status(409).json({ error: `Party size (${partySize}) exceeds largest table capacity (${maxCapacity}). Please contact the restaurant to accommodate larger parties.` });
+    }
+
+    // Find an available table using a clear interval-overlap test
     const tables = await pool.query(
-      `SELECT * FROM tables
+      `SELECT * FROM tables t
        WHERE capacity >= $1
-       AND id NOT IN (
+       AND t.id NOT IN (
          SELECT r.table_id FROM reservations r
          WHERE r.reservation_date = $2
          AND r.status = 'active'
          AND (
-           r.reservation_time BETWEEN $3::time AND ($3::time + interval '2 hours')
-           OR ($3::time BETWEEN r.reservation_time AND r.reservation_time + interval '2 hours')
+           r.reservation_time < ($3::time + interval '2 hours')
+           AND (r.reservation_time + interval '2 hours') > $3::time
          )
        )
        ORDER BY capacity ASC
@@ -225,24 +246,42 @@ app.post("/api/reservations", async (req, res) => {
       [partySize, date, time]
     );
 
+    // Log when no tables are available (and show conflicting reservations)
     if (tables.rows.length === 0) {
+      console.log(`No available tables for ${date} at ${time} for party size ${partySize}`);
+
+      const conflictRes = await pool.query(
+        `SELECT r.* FROM reservations r
+         WHERE r.reservation_date = $1
+         AND r.status = 'active'
+         AND (
+           r.reservation_time < ($2::time + interval '2 hours')
+           AND (r.reservation_time + interval '2 hours') > $2::time
+         )
+         ORDER BY r.reservation_time`,
+        [date, time]
+      );
+
+      console.log('Conflicting reservations:', conflictRes.rows);
+
       return res.status(409).json({ error: "No available tables for this time slot" });
     }
 
     const table = tables.rows[0];
 
-    const result = await pool.query(
-      `INSERT INTO reservations
-       (table_id, guest_name, guest_email, guest_phone, party_size, reservation_date, reservation_time)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING *`,
-      [table.id, guestName, guestEmail, guestPhone, partySize, date, time]
-    );
 
+    // Insert reservation
+    const insertQuery = `
+      INSERT INTO reservations
+      (table_id, guest_name, guest_email, guest_phone, party_size, reservation_date, reservation_time)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING *
+    `;
+    const result = await pool.query(insertQuery, [table.id, guestName, guestEmail, guestPhone, partySize, date, time]);
     const reservation = result.rows[0];
+
     await sendConfirmationEmail(reservation);
 
-    // Generate a confirmation number for the response
     const confirmationNumber = 'RES' + reservation.id.toString().padStart(6, '0');
 
     res.status(201).json({
@@ -250,11 +289,14 @@ app.post("/api/reservations", async (req, res) => {
       confirmationNumber,
       message: "Reservation created successfully"
     });
+
   } catch (err) {
-    console.error("Error creating reservation:", err.message);
+    console.error("Error creating reservation:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
+
+
 
 // Get reservation by ID or confirmation number
 app.get("/api/reservations/:id", async (req, res) => {
@@ -317,7 +359,9 @@ app.get("/api/health", (req, res) => {
 
 // Serve your main page
 app.get("/", (req, res) => {
-  res.sendFile(path.resolve("index.html"));
+  // Use process.cwd() so this file works when running as an ES module
+  // (where __dirname is not defined) and in other environments.
+  res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
 });
 
 // Start server
