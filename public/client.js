@@ -208,7 +208,10 @@ function initializeApp() {
   renderReviews();
   setupScrollHeader();
 
+  // Attach scroll-to-visit only to CTAs that are meant to scroll, not to modal triggers.
   document.querySelectorAll('.cta').forEach(btn => {
+    // If this button is a modal trigger (has aria-controls or data-modal), skip adding the scroll behavior
+    if (btn.hasAttribute('aria-controls') || btn.dataset.modal !== undefined) return;
     if (btn.textContent.includes('Reserve')) btn.addEventListener('click', handleReservationButton);
   });
 

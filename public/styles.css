@@ -157,7 +157,7 @@ h2 { font-size:1.8rem; margin:0 0 18px; }
 }
 
 /* Reviews */
-.reviews { display:grid; grid-template-columns:2fr 1fr; gap:16px; }
+.reviews { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:16px; }
 .review-track {
   display:flex; gap:14px;
   overflow:auto; scroll-snap-type:x mandatory;
@@ -209,3 +209,52 @@ footer {
 @media (max-width: 520px) {
   .menu-grid { grid-template-columns:1fr; }
 }
+
+/* Modal and form styles moved from inline */
+.modal { display: none; position: fixed; inset: 0; z-index: 1000; align-items: center; justify-content: center; }
+.modal[aria-hidden="false"] { display: flex; }
+.modal__overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
+.modal__overlay {
+  /* Blur the page content behind the overlay (modern browsers) */
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  background: rgba(0,0,0,0.35); /* slightly lighter to allow blur visibility */
+}
+.modal__panel { position: relative; background: #fff; padding: 1.25rem; border-radius: 8px; width: 94%; max-width: 540px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 1; }
+.modal__close { position: absolute; top: 8px; right: 8px; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; }
+@media (prefers-reduced-motion: no-preference) {
+  .modal__panel { transform: translateY(-6px); transition: transform .18s ease, opacity .18s ease; }
+}
+
+/* Form spacing and basic input styles */
+.form-group { margin-bottom: 0.9rem; }
+.form-group label { display: block; margin-bottom: 0.35rem; font-weight: 600; color: #222; }
+.form-group input,
+.form-group select,
+.form-group textarea { width: 100%; padding: 0.5rem 0.6rem; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 0.95rem; }
+.modal__panel .form-group input { background: #fff; }
+
+/* Slight spacing for buttons inside modal */
+.modal__panel .cta { margin-top: 0.25rem; }
+
+/* Focus states */
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus { outline: none; border-color: #8ab4ff; box-shadow: 0 0 0 3px rgba(138,180,255,0.12); }
+
+/* Responsive two-column layout for party size / date & time */
+.form-row { display: block; gap: 0.75rem; }
+.form-row .col { display: block; }
+
+@media (min-width: 640px) {
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+  /* Right column: date and time side-by-side */
+  .form-row .col.stack { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .form-row .col.stack .form-group { margin-bottom: 0; }
+}
+
+/* small aesthetic tweaks */
+.modal__panel h3 { margin-top: 0; margin-bottom: 0.8rem; }
+
+/* Optional: make modal buttons visually distinct */
+.modal__panel .cta { padding: 0.5rem 0.9rem; border-radius: 6px; }
