@@ -177,7 +177,7 @@
               <div class="col">
                 <div class="form-group">
                   <label for="partySize">Party Size</label>
-                  <input type="number" id="partySize" name="partySize" placeholder="Number of Guests" min="1" required>
+                  <input type="number" id="partySize" name="partySize" placeholder="Number of Guests" min="1" max="10" required>
                 </div>
               </div>
               <div class="col stack">
@@ -215,7 +215,7 @@
       const main = document.querySelector('main');
       let lastActive = null;
 
-      // Utility: return focusable elements within modal
+      // Utility: return focusable elements within modal.
       function getFocusable() {
         return Array.from(modal.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'))
           .filter(el => el.offsetParent !== null);
@@ -295,7 +295,7 @@
 
       // Keep existing form submit handlers elsewhere working; don't intercept here.
       if (form) form.addEventListener('submit', (e) => {
-        // No-op: submission handled by client.js/PampanganAPI; you can close modal on success via event or callback.
+        // No-operation: submission handled by client.js/PampanganAPI; you can close modal on success via event or callback.
       });
     })();
   </script>

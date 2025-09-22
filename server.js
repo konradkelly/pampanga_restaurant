@@ -7,6 +7,9 @@ import path from "path";
 
 // Load environment variables
 dotenv.config();
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_SERVICE:", process.env.EMAIL_SERVICE);
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,7 +57,7 @@ async function initDB() {
         guest_name VARCHAR(100) NOT NULL,
         guest_email VARCHAR(100) NOT NULL,
         guest_phone VARCHAR(20),
-        party_size INT NOT NULL CHECK (party_size > 0 AND party_size <= 8),
+  party_size INT NOT NULL CHECK (party_size > 0 AND party_size <= 10),
         reservation_date DATE NOT NULL,
         reservation_time TIME NOT NULL,
         status VARCHAR(20) DEFAULT 'active',
@@ -65,10 +68,12 @@ async function initDB() {
     // Seed tables (6 tables, only if empty)
     const result = await pool.query("SELECT COUNT(*) FROM tables");
     if (parseInt(result.rows[0].count) === 0) {
-      for (let i = 1; i <= 6; i++) {
+      // Use an explicit seed array so we can control capacities (including larger tables)
+      const seedCapacities = [2, 2, 4, 4, 10]; // two 2-tops, two 4-tops, one 10-tops
+      for (let i = 1; i <= seedCapacities.length; i++) {
         await pool.query(
           "INSERT INTO tables (table_number, capacity) VALUES ($1, $2)",
-          [i, i <= 2 ? 2 : i <= 4 ? 4 : 6] // 2x2-top, 2x4-top, 2x6-top
+          [i, seedCapacities[i - 1]]
         );
       }
       console.log("✅ Seeded tables");
@@ -99,10 +104,10 @@ function generateTimeSlots() {
 let transporter = null;
 if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
   transporter = nodemailer.createTransport({
-    service: "gmail",
+    service: process.env.Email_Service,
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
+      user: process.env.Email_User,
+      pass: process.env.Email_Password,
     },
   });
 } else {
@@ -118,14 +123,14 @@ Thank you!`;
   if (transporter) {
     try {
       const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: reservation.guest_email,
+        from: process.env.Email_User,
+        to: process.env.Email_User,
         subject: "Your Reservation Confirmation",
         text: message,
       };
       
       await transporter.sendMail(mailOptions);
-      console.log(`📧 Confirmation email sent to ${reservation.guest_email}`);
+      console.log(`📧 Confirmation email sent to ${process.env.Email_User}`);
     } catch (error) {
       console.error('❌ Email send error:', error);
     }
@@ -141,7 +146,7 @@ Thank you!`;
 app.get("/api/restaurant/:id", async (req, res) => {
   res.json({
     id: 1,
-    name: "Bayanihan Filipino Restaurant",
+    name: "Mckenie's Pampanga Filipino Restaurant",
     address: "123 Main Street, Your City, State 12345",
     phone: "(555) 123-4567",
     email: "info@bayanihanrestaurant.com",
@@ -217,6 +222,11 @@ app.post("/api/reservations", async (req, res) => {
     partySize = parseInt(partySize, 10);
     if (Number.isNaN(partySize) || partySize <= 0) {
       return res.status(400).json({ error: "Invalid party size" });
+    }
+
+    // Enforce maximum party size on server-side (must match DB constraint)
+    if (partySize > 10) {
+      return res.status(409).json({ error: `Party size (${partySize}) exceeds maximum allowed (10). Please contact the restaurant for large parties.` });
     }
 
     // Quick check: if requested party size is larger than any single table's capacity,
@@ -355,6 +365,25 @@ app.delete("/api/reservations/:id", async (req, res) => {
 // Health check endpoint
 app.get("/api/health", (req, res) => {
   res.json({ status: "Server is running!", timestamp: new Date().toISOString() });
+});
+
+app.get("/api/test-email", async (req, res) => {
+    if (!transporter) {
+        return res.status(500).json({ error: "Email not configured" });
+    }
+
+    try {
+        await transporter.sendMail({
+            from: process.env.Email_User,
+            to: 'konradky@gmail.com',
+            subject: "Test Email",
+            text: "This is a test email from your application.",
+        });
+        res.json({ message: "Test email sent successfully" });
+    } catch (error) {
+        console.error("Error sending test email:", error);
+        res.status(500).json({ error: "Failed to send test email" });
+    }
 });
 
 // Serve your main page

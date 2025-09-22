@@ -170,11 +170,23 @@ function handleReservationFormSubmit(event) {
   const timeValue = form.time.value;
   const formattedTime = timeValue.length === 5 ? timeValue + ':00' : timeValue;
 
+  const partySizeValue = parseInt(form.partySize.value, 10);
+
+  if (Number.isNaN(partySizeValue) || partySizeValue < 1) {
+    alert('Please enter a valid party size (1 or more).');
+    return;
+  }
+
+  if (partySizeValue > 10) {
+    alert('We currently accept parties up to 10 guests. For larger groups, please call the restaurant.');
+    return;
+  }
+
   const formData = {
     guestName: form.guestName.value.trim(),
     guestEmail: form.guestEmail.value.trim(),
     guestPhone: form.guestPhone.value.trim(),
-    partySize: parseInt(form.partySize.value, 10),
+    partySize: partySizeValue,
     date: form.date.value,
     time: formattedTime
   };
