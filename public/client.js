@@ -1,4 +1,5 @@
 // client.js - Frontend functionality for Bayanihan Eatery
+// Note: This works with api.js which provides the PampanganAPI object
 
 /**
  * Utility Functions
@@ -158,54 +159,11 @@ function setupScrollHeader() {
 }
 
 /**
- * Reservation
+ * Reservation - Modal approach only
  */
-function handleReservationButton() { scrollToId('visit'); }
-
-function handleReservationFormSubmit(event) {
-  event.preventDefault();
-  const form = event.target;
-
-    // Format time to HH:MM:SS
-  const timeValue = form.time.value;
-  const formattedTime = timeValue.length === 5 ? timeValue + ':00' : timeValue;
-
-  const partySizeValue = parseInt(form.partySize.value, 10);
-
-  if (Number.isNaN(partySizeValue) || partySizeValue < 1) {
-    alert('Please enter a valid party size (1 or more).');
-    return;
-  }
-
-  if (partySizeValue > 10) {
-    alert('We currently accept parties up to 10 guests. For larger groups, please call the restaurant.');
-    return;
-  }
-
-  const formData = {
-    guestName: form.guestName.value.trim(),
-    guestEmail: form.guestEmail.value.trim(),
-    guestPhone: form.guestPhone.value.trim(),
-    partySize: partySizeValue,
-    date: form.date.value,
-    time: formattedTime
-  };
-
-  // Async IIFE to call ReservationFlow
-  (async () => {
-    try {
-      const result = await PampanganAPI.Flow.submitReservation(formData);
-      if (result.success) {
-        alert(`✅ Reservation confirmed! Your confirmation number is: ${result.data?.confirmationNumber || 'N/A'}`);
-        form.reset();
-      } else {
-        alert(`❌ Error: ${result.error}`);
-      }
-    } catch (err) {
-      console.error('Reservation submit error:', err);
-      alert('❌ Something went wrong. Please try again.');
-    }
-  })();
+function handleReservationButton() { 
+  // For modal approach, this just triggers the modal
+  PampanganAPI.Flow.start(); 
 }
 
 
@@ -225,10 +183,10 @@ function initializeApp() {
     // If this button is a modal trigger (has aria-controls or data-modal), skip adding the scroll behavior
     if (btn.hasAttribute('aria-controls') || btn.dataset.modal !== undefined) return;
     if (btn.textContent.includes('Reserve')) btn.addEventListener('click', handleReservationButton);
+    if (btn.textContent.includes('Make a Reservation')) btn.addEventListener('click', handleReservationButton);
   });
 
   const reservationForm = document.getElementById('reservationForm');
-  if (reservationForm) reservationForm.addEventListener('submit', handleReservationFormSubmit);
 
   console.log('🍽️ Pampangan Restaurant initialized successfully!');
 }

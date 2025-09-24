@@ -87,6 +87,181 @@ const ReservationAPI = {
  * Reservation Flow (with validation)
  */
 const ReservationFlow = {
+  lastActiveElement: null,
+
+  start() {
+    if (document.getElementById('reservationModal')) return;
+
+    // Store the currently focused element
+    this.lastActiveElement = document.activeElement;
+
+    const modalHTML = `
+      <div id="reservationModal" class="modal" role="dialog" aria-modal="true" aria-hidden="false" aria-labelledby="modalTitle">
+        <div class="modal__overlay" data-close></div>
+        <div class="modal__panel">
+          <button class="modal__close" aria-label="Close reservation form" data-close>&times;</button>
+          <h3 id="modalTitle">Reserve a Table</h3>
+          <form id="reservationForm">
+            <div class="form-group">
+              <label for="guestName">Name</label>
+              <input type="text" id="guestName" name="guestName" placeholder="Your Name" required>
+            </div>
+            <div class="form-group">
+              <label for="guestEmail">Email</label>
+              <input type="email" id="guestEmail" name="guestEmail" placeholder="Your Email" required>
+            </div>
+            <div class="form-group">
+              <label for="guestPhone">Phone</label>
+              <input type="tel" id="guestPhone" name="guestPhone" placeholder="Your Phone" required>
+            </div>
+            <div class="form-row">
+              <div class="col">
+                <div class="form-group">
+                  <label for="partySize">Party Size</label>
+                  <input type="number" id="partySize" name="partySize" placeholder="Number of Guests" min="1" max="10" required>
+                </div>
+              </div>
+              <div class="col stack">
+                <div class="form-group">
+                  <label for="date">Date</label>
+                  <input type="date" id="date" name="date" required>
+                </div>
+                <div class="form-group">
+                  <label for="time">Time</label>
+                  <input type="time" id="time" name="time" required>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+              <button type="submit" class="cta">Reserve</button>
+              <button type="button" data-close class="cta" style="background:#ccc;color:#000;">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.body.style.overflow = 'hidden';
+
+    // Hide main content from screen readers
+    const main = document.querySelector('main');
+    if (main) main.setAttribute('aria-hidden', 'true');
+
+    // Set up event listeners
+    this.setupModalEventListeners();
+
+    // Focus management
+    requestAnimationFrame(() => {
+      const firstInput = document.getElementById('guestName');
+      if (firstInput) {
+        try {
+          firstInput.focus({ preventScroll: true });
+        } catch (err) {
+          firstInput.focus();
+        }
+      }
+    });
+  },
+
+  setupModalEventListeners() {
+    const modal = document.getElementById('reservationModal');
+    if (!modal) return;
+
+    // Close button handlers
+    modal.querySelectorAll('[data-close]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.close();
+      });
+    });
+
+    // Overlay click to close
+    modal.addEventListener('click', (e) => {
+      if (e.target.hasAttribute('data-close')) {
+        e.preventDefault();
+        this.close();
+      }
+    });
+
+    // Form submission
+    const form = modal.querySelector('#reservationForm');
+    if (form) {
+      form.addEventListener('submit', (e) => this.handleSubmit(e));
+    }
+
+    // Focus trap and escape key
+    modal.addEventListener('keydown', (e) => this.handleKeyDown(e));
+  },
+
+  handleKeyDown(e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      this.close();
+      return;
+    }
+
+    if (e.key === 'Tab') {
+      const modal = document.getElementById('reservationModal');
+      if (!modal) return;
+
+      const focusableElements = Array.from(modal.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )).filter(el => el.offsetParent !== null);
+
+      if (focusableElements.length === 0) {
+        e.preventDefault();
+        return;
+      }
+
+      const first = focusableElements[0];
+      const last = focusableElements[focusableElements.length - 1];
+
+      if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      } else if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    }
+  },
+
+  close() {
+    const modal = document.getElementById('reservationModal');
+    if (modal) {
+      modal.remove();
+      document.body.style.overflow = '';
+      
+      // Restore main content visibility
+      const main = document.querySelector('main');
+      if (main) main.removeAttribute('aria-hidden');
+
+      // Restore focus to the element that opened the modal
+      if (this.lastActiveElement && typeof this.lastActiveElement.focus === 'function') {
+        try {
+          this.lastActiveElement.focus({ preventScroll: true });
+        } catch (err) {
+          this.lastActiveElement.focus();
+        }
+      }
+    }
+  },
+
+  handleSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = {
+      guestName: form.guestName.value.trim(),
+      guestEmail: form.guestEmail.value.trim(), 
+      guestPhone: form.guestPhone.value.trim(),
+      partySize: parseInt(form.partySize.value, 10),
+      date: form.date.value,
+      time: form.time.value.length === 5 ? form.time.value + ':00' : form.time.value
+    };
+    this.submitReservation(formData);
+  },
+
   async submitReservation(formData) {
     const required = ['guestName', 'guestEmail', 'guestPhone', 'partySize', 'date', 'time'];
     const missing = required.filter(f => !formData[f]);
@@ -95,7 +270,14 @@ const ReservationFlow = {
     if (!APIUtils.isValidEmail(formData.guestEmail)) return { success: false, error: 'Invalid email' };
     if (!APIUtils.isValidPhone(formData.guestPhone)) return { success: false, error: 'Invalid phone number' };
 
-    return await ReservationAPI.create(formData);
+    const result = await ReservationAPI.create(formData);
+    if (result.success) {
+      this.close();
+      const confirmationNumber = result.data?.id || result.data?.confirmationNumber || `RES-${result.data?.id || 'N/A'}`;
+      alert(`Reservation confirmed! Your confirmation number is ${confirmationNumber}`);
+    } else {
+      alert(`Error: ${result.error}`);
+    }
   }
 };
 

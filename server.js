@@ -12,7 +12,7 @@ console.log("EMAIL_SERVICE:", process.env.EMAIL_SERVICE);
 
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(express.json());
@@ -116,7 +116,7 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
 
 async function sendConfirmationEmail(reservation) {
   const message = `Hello ${reservation.guest_name}, 
-Your reservation for ${reservation.party_size} guests on ${reservation.reservation_date} at ${reservation.reservation_time} is confirmed.
+Your reservation for ${reservation.party_size} guests on ${reservation.reservation_date} at ${reservation.reservation_time} is confirmed. Your confirmation number is ${reservation.confirmationNumber}.
 
 Thank you!`;
 
@@ -207,11 +207,13 @@ app.get("/api/availability", async (req, res) => {
 // Create a reservation
 app.post("/api/reservations", async (req, res) => {
   try {
+    console.log("Received reservation request with body:", req.body);
   let { guestName, guestEmail, guestPhone, partySize, date, time } = req.body;
 
     console.log("Reservation request:", req.body);
 
     if (!guestName || !guestEmail || !partySize || !date || !time) {
+      console.error("Validation Error: Missing required fields.", req.body);
       return res.status(400).json({ error: "Missing required fields" });
     }
 
